@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bem-vindo!</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .header {
+      text-align: center;
+      padding: 20px 0;
+      background-color: #007bff;
+      color: white;
+      border-radius: 10px 10px 0 0;
+      margin: -20px -20px 20px -20px;
+    }
+
+    .code-box {
+      background-color: #f8f9fa;
+      border: 2px dashed #007bff;
+      border-radius: 5px;
+      padding: 15px;
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    .code {
+      font-size: 24px;
+      font-weight: bold;
+      color: #007bff;
+      letter-spacing: 2px;
+    }
+
+    .footer {
+      text-align: center;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+      color: #666;
+      font-size: 12px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎉 Bem-vindo!</h1>
+    </div>
+
+    <h2>Olá, {{uppercase name}}!</h2>
+
+    <p>É um prazer tê-lo conosco! Sua conta foi criada com sucesso.</p>
+
+    {{#if code}}
+    <div class="code-box">
+      <p>Seu código de verificação é:</p>
+      <div class="code">{{code}}</div>
+    </div>
+    {{/if}}
+
+    <p>Agora você pode aproveitar todos os nossos serviços:</p>
+    <ul>
+      <li>✅ Acesso completo à plataforma</li>
+      <li>🔔 Notificações personalizadas</li>
+      <li>🎯 Recursos exclusivos</li>
+      <li>📞 Suporte 24/7</li>
+    </ul>
+
+    {{#if activationUrl}}
+    <p style="text-align: center;">
+      <a href="{{activationUrl}}" style="background-color: #007bff; color: white; padding: 12px 24px; 
+                      text-decoration: none; border-radius: 5px; display: inline-block;">
+        Ativar Conta
+      </a>
+    </p>
+    {{/if}}
+
+    <p>Se você tiver alguma dúvida, não hesite em nos contatar.</p>
+
+    <p>Atenciosamente,<br>
+      <strong>Equipe de Desenvolvimento</strong>
+    </p>
+
+    <div class="footer">
+      <p>Este e-mail foi enviado em {{formatDate sentAt 'datetime'}}</p>
+      <p>© 2025 Email Service. Todos os direitos reservados.</p>
+    </div>
+  </div>
+</body>
+
+</html>

@@ -1,0 +1,188 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model EmailLog {
+  id           String      @id @default(cuid())
+  to           String
+  subject      String
+  template     String
+  variables    Json?
+  status       EmailStatus @default(PENDING)
+  provider     String?
+  errorMessage String?
+  sentAt       DateTime?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  attempts     Int         @default(0)
+  maxAttempts  Int         @default(3)
+  jobId        String?     @unique
+
+  @@map("email_logs")
+}
+
+model SystemConfig {
+  id          String           @id @default(cuid())
+  key         String           @unique
+  value       String
+  type        SystemConfigType @default(STRING)
+  description String?
+  category    String
+  isActive    Boolean          @default(true)
+  isPublic    Boolean          @default(false) // Se pode ser exposto em APIs públicas
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  createdBy   String? // ID do usuário que criou
+  updatedBy   String? // ID do usuário que atualizou
+
+  @@map("system_configs")
+}
+
+model ConfigHistory {
+  id        String   @id @default(cuid())
+  configKey String
+  oldValue  String?
+  newValue  String
+  changedBy String? // ID do usuário
+  reason    String? // Motivo da mudança
+  createdAt DateTime @default(now())
+
+  @@map("config_history")
+}
+
+model AllowedIP {
+  id          String    @id @default(cuid())
+  ipAddress   String    @unique
+  description String?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  lastUsed    DateTime?
+  usageCount  Int       @default(0)
+  createdBy   String?
+
+  @@map("allowed_ips")
+}
+
+model BlockedDomain {
+  id        String   @id @default(cuid())
+  domain    String   @unique
+  reason    String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  blockedBy String?
+
+  @@map("blocked_domains")
+}
+
+model EmailTemplate {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  subject     String
+  content     String // Conteúdo HTML/Handlebars
+  description String?
+  variables   Json? // Schema das variáveis esperadas
+  isActive    Boolean  @default(true)
+  version     Int      @default(1)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String?
+  updatedBy   String?
+
+  history TemplateHistory[]
+
+  @@map("email_templates")
+}
+
+model TemplateHistory {
+  id         String   @id @default(cuid())
+  templateId String
+  name       String
+  subject    String
+  content    String
+  version    Int
+  changedBy  String?
+  reason     String?
+  createdAt  DateTime @default(now())
+
+  template EmailTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  @@map("template_history")
+}
+
+model WebhookConfig {
+  id           String    @id @default(cuid())
+  name         String
+  url          String
+  secret       String?
+  events       String[] // ['email.sent', 'email.failed', etc]
+  isActive     Boolean   @default(true)
+  retryCount   Int       @default(3)
+  timeout      Int       @default(5000) // em milliseconds
+  headers      Json? // Headers customizados
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  lastUsed     DateTime?
+  successCount Int       @default(0)
+  failureCount Int       @default(0)
+
+  logs WebhookLog[]
+
+  @@map("webhook_configs")
+}
+
+model WebhookLog {
+  id           String   @id @default(cuid())
+  webhookId    String
+  event        String
+  url          String
+  payload      Json
+  response     String?
+  statusCode   Int?
+  success      Boolean
+  errorMessage String?
+  responseTime Int? // em milliseconds
+  createdAt    DateTime @default(now())
+
+  webhook WebhookConfig @relation(fields: [webhookId], references: [id], onDelete: Cascade)
+
+  @@map("webhook_logs")
+}
+
+model ApiKey {
+  id          String    @id @default(cuid())
+  name        String
+  key         String    @unique
+  permissions String[] // ['send_email', 'view_metrics', 'admin']
+  isActive    Boolean   @default(true)
+  expiresAt   DateTime?
+  lastUsed    DateTime?
+  usageCount  Int       @default(0)
+  rateLimit   Int       @default(100) // requests per hour
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  createdBy   String?
+
+  @@map("api_keys")
+}
+
+enum EmailStatus {
+  PENDING
+  SENT
+  FAILED
+  RETRYING
+}
+
+enum SystemConfigType {
+  STRING
+  NUMBER
+  BOOLEAN
+  JSON
+  ARRAY
+}
