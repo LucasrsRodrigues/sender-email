@@ -5,13 +5,14 @@ import { PrismaService } from '../prisma/prisma.service';
 import { TemplateService } from './template.service';
 import { SendEmailDto, EmailJobData, EmailPriority } from './dto/send-email.dto';
 import { EmailStatus } from 'generated/prisma';
+import { TemplateDbService } from './template-db.service';
 
 @Injectable()
 export class EmailService {
   constructor(
     @InjectQueue('email') private emailQueue: Queue<EmailJobData>,
     private prisma: PrismaService,
-    private templateService: TemplateService,
+    private templateDbService: TemplateDbService,
   ) { }
 
   async sendEmail(sendEmailDto: SendEmailDto) {
@@ -227,8 +228,8 @@ export class EmailService {
     }
   }
 
-  getAvailableTemplates(): string[] {
-    return this.templateService.getAvailableTemplates();
+  getAvailableTemplates() {
+    return this.templateDbService.getAvailableTemplates();
   }
 
   private mapStatusToLevel(status: string): string {

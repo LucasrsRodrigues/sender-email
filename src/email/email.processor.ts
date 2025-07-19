@@ -1,8 +1,10 @@
+// src/email/email.processor.ts
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { TemplateService } from './template.service';
+import { TemplateDbService } from './template-db.service';
+import { ConfigService } from '../config/config.service'; // ← NOVA IMPORTAÇÃO
 import { EmailJobData } from './dto/send-email.dto';
 import { EmailStatus } from '@prisma/client';
 import * as nodemailer from 'nodemailer';
@@ -16,10 +18,12 @@ export class EmailProcessor extends WorkerHost {
 
   constructor(
     private prisma: PrismaService,
-    private templateService: TemplateService,
+    private templateDbService: TemplateDbService,
+    private configService: ConfigService, // ← NOVA DEPENDÊNCIA
   ) {
     super();
-    this.setupEmailProviders();
+    // Não chamar setupEmailProviders no constructor
+    // Será chamado dinamicamente a cada email
   }
 
   async process(job: Job<EmailJobData>): Promise<any> {
@@ -34,8 +38,14 @@ export class EmailProcessor extends WorkerHost {
         attempts: job.attemptsMade + 1,
       });
 
-      // Renderizar template
-      const htmlContent = await this.templateService.renderTemplate(template, variables || {});
+      // Renderizar template usando TemplateDbService
+      const { subject: templateSubject, content: htmlContent } = await this.templateDbService.renderTemplate(template, variables || {});
+
+      // Usar subject do template se não foi fornecido um específico
+      const finalSubject = subject || templateSubject;
+
+      // Configurar provedores de email dinamicamente (busca do banco)
+      await this.setupEmailProviders();
 
       // Tentar enviar por Gmail primeiro
       let success = false;
@@ -43,7 +53,7 @@ export class EmailProcessor extends WorkerHost {
       let errorMessage = '';
 
       try {
-        await this.sendViaGmail(to, subject, htmlContent, from);
+        await this.sendViaGmail(to, finalSubject, htmlContent, from);
         success = true;
         provider = 'gmail';
         this.logger.log(`E-mail enviado via Gmail para: ${to}`);
@@ -51,7 +61,7 @@ export class EmailProcessor extends WorkerHost {
         this.logger.warn(`Falha no Gmail: ${gmailError.message}`);
 
         try {
-          await this.sendViaSendGrid(to, subject, htmlContent, from);
+          await this.sendViaSendGrid(to, finalSubject, htmlContent, from);
           success = true;
           provider = 'sendgrid';
           this.logger.log(`E-mail enviado via SendGrid para: ${to}`);
@@ -81,28 +91,71 @@ export class EmailProcessor extends WorkerHost {
       await this.updateEmailLog(logId, {
         status: job.attemptsMade + 1 >= maxAttempts ? EmailStatus.FAILED : EmailStatus.RETRYING,
         errorMessage: error.message,
+        attempts: job.attemptsMade + 1,
       });
 
       throw error;
     }
   }
 
-  private setupEmailProviders() {
-    // Configurar Gmail
-    this.gmailTransporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_PASS,
-      },
-    });
+  // ← ALTERAÇÃO: Buscar configurações do banco de dados
+  private async setupEmailProviders() {
+    try {
+      this.logger.log('🔍 Buscando configurações SMTP do banco de dados...');
 
-    // Configurar SendGrid
-    if (process.env.SENDGRID_API_KEY) {
-      sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+      // Buscar configurações do banco de dados com fallback para env
+      const gmailUser = await this.configService.get<string>('GMAIL_USER', process.env.GMAIL_USER);
+      const gmailPass = await this.configService.get<string>('GMAIL_PASS', process.env.GMAIL_PASS);
+      const sendgridApiKey = await this.configService.get<string>('SENDGRID_API_KEY', process.env.SENDGRID_API_KEY);
+
+      this.logger.log(`📧 Gmail User: ${gmailUser ? 'Configurado' : 'Não encontrado'}`);
+      this.logger.log(`🔑 Gmail Pass: ${gmailPass ? 'Configurado' : 'Não encontrado'}`);
+      this.logger.log(`📨 SendGrid Key: ${sendgridApiKey ? 'Configurado' : 'Não encontrado'}`);
+
+      // Configurar Gmail se as credenciais estão disponíveis
+      if (gmailUser && gmailPass) {
+        this.gmailTransporter = nodemailer.createTransport({
+          service: 'gmail',
+          auth: {
+            user: gmailUser,
+            pass: gmailPass,
+          },
+        });
+        this.logger.log('✅ Gmail configurado com sucesso (via banco de dados)');
+      } else {
+        this.logger.warn('⚠️ Configurações do Gmail não encontradas no banco nem no .env');
+      }
+
+      // Configurar SendGrid se a API key está disponível
+      if (sendgridApiKey) {
+        sgMail.setApiKey(sendgridApiKey);
+        this.logger.log('✅ SendGrid configurado com sucesso (via banco de dados)');
+      } else {
+        this.logger.warn('⚠️ API key do SendGrid não encontrada no banco nem no .env');
+      }
+
+    } catch (error) {
+      this.logger.error(`❌ Erro ao configurar provedores de email: ${error.message}`);
+
+      // Fallback para variáveis de ambiente em caso de erro
+      this.logger.warn('🔄 Usando fallback para variáveis de ambiente');
+
+      if (process.env.GMAIL_USER && process.env.GMAIL_PASS) {
+        this.gmailTransporter = nodemailer.createTransport({
+          service: 'gmail',
+          auth: {
+            user: process.env.GMAIL_USER,
+            pass: process.env.GMAIL_PASS,
+          },
+        });
+        this.logger.log('✅ Gmail configurado via .env (fallback)');
+      }
+
+      if (process.env.SENDGRID_API_KEY) {
+        sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+        this.logger.log('✅ SendGrid configurado via .env (fallback)');
+      }
     }
-
-    this.logger.log('Provedores de e-mail configurados');
   }
 
   private async sendViaGmail(
@@ -111,8 +164,15 @@ export class EmailProcessor extends WorkerHost {
     html: string,
     from?: string,
   ): Promise<void> {
+    if (!this.gmailTransporter) {
+      throw new Error('Gmail não configurado ou credenciais inválidas');
+    }
+
+    // Buscar o email do remetente do banco ou usar fallback
+    const defaultFromEmail = await this.configService.get<string>('GMAIL_USER', process.env.GMAIL_USER);
+
     const mailOptions = {
-      from: from || process.env.GMAIL_USER,
+      from: from || defaultFromEmail,
       to,
       subject,
       html,
@@ -127,13 +187,22 @@ export class EmailProcessor extends WorkerHost {
     html: string,
     from?: string,
   ): Promise<void> {
-    if (!process.env.SENDGRID_API_KEY) {
-      throw new Error('SendGrid API key não configurada');
+    // Buscar configurações do banco
+    const sendgridApiKey = await this.configService.get<string>('SENDGRID_API_KEY', process.env.SENDGRID_API_KEY);
+    const defaultFromEmail = await this.configService.get<string>('SENDGRID_FROM_EMAIL',
+      await this.configService.get<string>('GMAIL_USER', process.env.GMAIL_USER)
+    );
+
+    if (!sendgridApiKey) {
+      throw new Error('SendGrid API key não configurada no banco nem no .env');
     }
+
+    // Configurar SendGrid dinamicamente
+    sgMail.setApiKey(sendgridApiKey);
 
     const msg = {
       to,
-      from: from || process.env.GMAIL_USER,
+      from: from || defaultFromEmail,
       subject,
       html,
     };

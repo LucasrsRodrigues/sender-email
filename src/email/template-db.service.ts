@@ -171,6 +171,7 @@ export class TemplateDbService {
         isActive: true,
         createdAt: true,
         updatedAt: true,
+        variables: true,
       },
       orderBy: { name: 'asc' }
     });
