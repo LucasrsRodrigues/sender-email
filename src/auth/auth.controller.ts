@@ -84,50 +84,46 @@ export class AuthController {
     };
   }
 
-  // === API KEYS ===
+  // // Gerar API Key
+  // @UseGuards(JwtAuthGuard)
+  // @Post('api-keys')
+  // async generateApiKey(@Request() req, @Body() generateApiKeyDto: GenerateApiKeyDto) {
+  //   const apiKey = await this.authService.generateApiKey(
+  //     req.user.userId,
+  //     generateApiKeyDto.name,
+  //     generateApiKeyDto.expiresAt,
+  //   );
 
-  // Gerar API Key
-  @UseGuards(JwtAuthGuard)
-  @Post('api-keys')
-  async generateApiKey(@Request() req, @Body() generateApiKeyDto: GenerateApiKeyDto) {
-    const apiKey = await this.authService.generateApiKey(
-      req.user.userId,
-      generateApiKeyDto.name,
-      generateApiKeyDto.expiresAt,
-    );
+  //   return {
+  //     status: 'success',
+  //     message: 'API Key gerada com sucesso. Guarde-a em local seguro!',
+  //     data: { apiKey },
+  //   };
+  // }
 
-    return {
-      status: 'success',
-      message: 'API Key gerada com sucesso. Guarde-a em local seguro!',
-      data: { apiKey },
-    };
-  }
+  // // Listar API Keys
+  // @UseGuards(JwtAuthGuard)
+  // @Get('api-keys')
+  // async getApiKeys(@Request() req) {
+  //   const apiKeys = await this.authService.getUserApiKeys(req.user.userId);
 
-  // Listar API Keys
-  @UseGuards(JwtAuthGuard)
-  @Get('api-keys')
-  async getApiKeys(@Request() req) {
-    const apiKeys = await this.authService.getUserApiKeys(req.user.userId);
+  //   return {
+  //     status: 'success',
+  //     data: { apiKeys, count: apiKeys.length },
+  //   };
+  // }
 
-    return {
-      status: 'success',
-      data: { apiKeys, count: apiKeys.length },
-    };
-  }
+  // // Revogar API Key
+  // @UseGuards(JwtAuthGuard)
+  // @Delete('api-keys/:id')
+  // async revokeApiKey(@Request() req, @Param('id') apiKeyId: string) {
+  //   await this.authService.revokeApiKey(req.user.userId, apiKeyId);
 
-  // Revogar API Key
-  @UseGuards(JwtAuthGuard)
-  @Delete('api-keys/:id')
-  async revokeApiKey(@Request() req, @Param('id') apiKeyId: string) {
-    await this.authService.revokeApiKey(req.user.userId, apiKeyId);
-
-    return {
-      status: 'success',
-      message: 'API Key revogada com sucesso',
-    };
-  }
-
-  // === ADMIN ENDPOINTS ===
+  //   return {
+  //     status: 'success',
+  //     message: 'API Key revogada com sucesso',
+  //   };
+  // }
 
   // Listar usuários (apenas admin)
   @UseGuards(JwtAuthGuard, RolesGuard)

@@ -191,9 +191,29 @@ model ApiKey {
   createdAt  DateTime  @default(now()) @map("created_at")
 
   // Relacionamentos
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user  User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  usage ApiKeyUsage[]
 
   @@map("api_keys")
+}
+
+model ApiKeyUsage {
+  id           String   @id @default(cuid())
+  apiKeyId     String   @map("api_key_id")
+  endpoint     String // Ex: "/email/send", "/templates"
+  method       String // GET, POST, PUT, DELETE
+  ipAddress    String?  @map("ip_address")
+  userAgent    String?  @map("user_agent")
+  statusCode   Int      @map("status_code")
+  responseTime Int?     @map("response_time") // Tempo de resposta em ms
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  apiKey ApiKey @relation(fields: [apiKeyId], references: [id], onDelete: Cascade)
+
+  @@index([apiKeyId])
+  @@index([createdAt])
+  @@index([endpoint])
+  @@map("api_key_usage")
 }
 
 model User {
