@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto, LoginDto, UpdateUserDto } from './dto/auth.dto';
-import { UserRole } from '../../prisma/generated/prisma';
+import { UserRole } from 'generated/prisma';
 import { randomBytes } from 'node:crypto';
 
 @Injectable()

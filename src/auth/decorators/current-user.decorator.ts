@@ -1,6 +1,6 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 import { AuthenticatedUser } from '../types/user.types';
-import { UserRole } from '../../prisma/generated/prisma';
+import { UserRole } from 'generated/prisma';
 
 export const CurrentUser = createParamDecorator(
   (data: keyof AuthenticatedUser | undefined, ctx: ExecutionContext): AuthenticatedUser | string | UserRole => {

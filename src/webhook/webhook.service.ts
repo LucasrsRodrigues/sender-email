@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { catchError, timeout } from 'rxjs/operators';
 import { of } from 'rxjs';
-import { EmailStatus } from '../../../../prisma/generated/prisma';
+import { EmailStatus } from '../../generated/prisma';
 
 export interface WebhookPayload {
   event: 'email.sent' | 'email.failed' | 'email.bounced';
