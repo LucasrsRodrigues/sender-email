@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { ConfigService } from './config.service';
 import { WhitelistGuard } from '../common/guards/whitelist.guard';
+import { WhitelistDbGuard } from 'src/common/guards/whitelist-db-.guard';
 
 class UpdateConfigDto {
   value: any;
@@ -21,7 +22,7 @@ class AddBlockedDomainDto {
 }
 
 @Controller('admin/config')
-@UseGuards(WhitelistGuard)
+@UseGuards(WhitelistDbGuard)
 export class ConfigController {
   constructor(private readonly configService: ConfigService) { }
 

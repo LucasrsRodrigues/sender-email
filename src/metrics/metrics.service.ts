@@ -255,6 +255,11 @@ export class MetricsService {
   private async checkQueueHealth() {
     try {
       const stats = await this.getQueueStats();
+
+      console.log("===> checkQueueHealth")
+      console.log(stats)
+      console.log("===> checkQueueHealth")
+
       const isHealthy = stats.active < 100 && stats.failed < stats.completed * 0.1;
 
       return {

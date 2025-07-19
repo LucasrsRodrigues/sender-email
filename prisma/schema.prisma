@@ -8,7 +8,7 @@ datasource db {
 }
 
 model EmailLog {
-  id           String      @id @default(cuid()) @map("id")
+  id           String      @id @default(uuid()) @map("id")
   to           String      @map("to")
   subject      String      @map("subject")
   template     String      @map("template")
@@ -18,7 +18,7 @@ model EmailLog {
   errorMessage String?     @map("error_message")
   sentAt       DateTime?   @map("sent_at")
   createdAt    DateTime    @default(now()) @map("created_at")
-  updatedAt    DateTime    @updatedAt @map("updated_at")
+  updatedAt    DateTime?   @updatedAt @map("updated_at")
   attempts     Int         @default(0) @map("attempts")
   maxAttempts  Int         @default(3) @map("max_attempts")
   jobId        String?     @unique @map("job_id")
@@ -27,7 +27,7 @@ model EmailLog {
 }
 
 model SystemConfig {
-  id          String           @id @default(cuid()) @map("id")
+  id          String           @id @default(uuid()) @map("id")
   key         String           @unique @map("key")
   value       String           @map("value")
   type        SystemConfigType @default(STRING) @map("type")
@@ -36,7 +36,7 @@ model SystemConfig {
   isActive    Boolean          @default(true) @map("is_active")
   isPublic    Boolean          @default(false) @map("is_public")
   createdAt   DateTime         @default(now()) @map("created_at")
-  updatedAt   DateTime         @updatedAt @map("updated_at")
+  updatedAt   DateTime?        @updatedAt @map("updated_at")
   createdBy   String?          @map("created_by")
   updatedBy   String?          @map("updated_by")
 
@@ -44,7 +44,7 @@ model SystemConfig {
 }
 
 model ConfigHistory {
-  id        String   @id @default(cuid()) @map("id")
+  id        String   @id @default(uuid()) @map("id")
   configKey String   @map("config_key")
   oldValue  String?  @map("old_value")
   newValue  String   @map("new_value")
@@ -56,12 +56,12 @@ model ConfigHistory {
 }
 
 model AllowedIP {
-  id          String    @id @default(cuid()) @map("id")
+  id          String    @id @default(uuid()) @map("id")
   ipAddress   String    @unique @map("ip_address")
   description String?   @map("description")
   isActive    Boolean   @default(true) @map("is_active")
   createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
+  updatedAt   DateTime? @updatedAt @map("updated_at")
   lastUsed    DateTime? @map("last_used")
   usageCount  Int       @default(0) @map("usage_count")
   createdBy   String?   @map("created_by")
@@ -70,30 +70,30 @@ model AllowedIP {
 }
 
 model BlockedDomain {
-  id        String   @id @default(cuid()) @map("id")
-  domain    String   @unique @map("domain")
-  reason    String?  @map("reason")
-  isActive  Boolean  @default(true) @map("is_active")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-  blockedBy String?  @map("blocked_by")
+  id        String    @id @default(uuid()) @map("id")
+  domain    String    @unique @map("domain")
+  reason    String?   @map("reason")
+  isActive  Boolean   @default(true) @map("is_active")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+  blockedBy String?   @map("blocked_by")
 
   @@map("blocked_domains")
 }
 
 model EmailTemplate {
-  id          String   @id @default(cuid()) @map("id")
-  name        String   @unique @map("name")
-  subject     String   @map("subject")
-  content     String   @map("content")
-  description String?  @map("description")
-  variables   Json?    @map("variables")
-  isActive    Boolean  @default(true) @map("is_active")
-  version     Int      @default(1) @map("version")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
-  createdBy   String?  @map("created_by")
-  updatedBy   String?  @map("updated_by")
+  id          String    @id @default(uuid()) @map("id")
+  name        String    @unique @map("name")
+  subject     String    @map("subject")
+  content     String    @map("content")
+  description String?   @map("description")
+  variables   Json?     @map("variables")
+  isActive    Boolean   @default(true) @map("is_active")
+  version     Int       @default(1) @map("version")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime? @updatedAt @map("updated_at")
+  createdBy   String?   @map("created_by")
+  updatedBy   String?   @map("updated_by")
 
   history TemplateHistory[]
 
@@ -101,7 +101,7 @@ model EmailTemplate {
 }
 
 model TemplateHistory {
-  id         String   @id @default(cuid()) @map("id")
+  id         String   @id @default(uuid()) @map("id")
   templateId String   @map("template_id")
   name       String   @map("name")
   subject    String   @map("subject")
@@ -117,7 +117,7 @@ model TemplateHistory {
 }
 
 model WebhookConfig {
-  id           String    @id @default(cuid()) @map("id")
+  id           String    @id @default(uuid()) @map("id")
   name         String    @map("name")
   url          String    @map("url")
   secret       String?   @map("secret")
@@ -127,7 +127,7 @@ model WebhookConfig {
   timeout      Int       @default(5000) @map("timeout")
   headers      Json?     @map("headers")
   createdAt    DateTime  @default(now()) @map("created_at")
-  updatedAt    DateTime  @updatedAt @map("updated_at")
+  updatedAt    DateTime? @updatedAt @map("updated_at")
   lastUsed     DateTime? @map("last_used")
   successCount Int       @default(0) @map("success_count")
   failureCount Int       @default(0) @map("failure_count")
@@ -138,7 +138,7 @@ model WebhookConfig {
 }
 
 model WebhookLog {
-  id           String   @id @default(cuid()) @map("id")
+  id           String   @id @default(uuid()) @map("id")
   webhookId    String   @map("webhook_id")
   event        String   @map("event")
   url          String   @map("url")
@@ -156,7 +156,7 @@ model WebhookLog {
 }
 
 model ApiKey {
-  id          String    @id @default(cuid()) @map("id")
+  id          String    @id @default(uuid()) @map("id")
   name        String    @map("name")
   key         String    @unique @map("key")
   permissions String[]  @map("permissions")
@@ -166,7 +166,7 @@ model ApiKey {
   usageCount  Int       @default(0) @map("usage_count")
   rateLimit   Int       @default(100) @map("rate_limit")
   createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
+  updatedAt   DateTime? @updatedAt @map("updated_at")
   createdBy   String?   @map("created_by")
 
   @@map("api_keys")

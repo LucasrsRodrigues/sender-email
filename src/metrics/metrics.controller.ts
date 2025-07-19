@@ -1,9 +1,10 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { MetricsService } from './metrics.service';
 import { WhitelistGuard } from '../common/guards/whitelist.guard';
+import { WhitelistDbGuard } from 'src/common/guards/whitelist-db-.guard';
 
 @Controller('metrics')
-@UseGuards(WhitelistGuard)
+@UseGuards(WhitelistDbGuard)
 export class MetricsController {
   constructor(private readonly metricsService: MetricsService) { }
 

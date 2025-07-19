@@ -84,6 +84,13 @@ export class QueueManagementController {
   @Get('health')
   async getQueueHealth() {
     const health = await this.bullMQHealthService.getQueueHealth();
+
+
+    console.log("===> health")
+    console.log(health)
+    console.log("===> health")
+
+
     const isHealthy = health.isHealthy;
 
     return {

@@ -3,9 +3,10 @@ import { Throttle } from '@nestjs/throttler';
 import { EmailService } from './email.service';
 import { SendEmailDto } from './dto/send-email.dto';
 import { WhitelistGuard } from '../common/guards/whitelist.guard';
+import { WhitelistDbGuard } from 'src/common/guards/whitelist-db-.guard';
 
 @Controller('email')
-@UseGuards(WhitelistGuard)
+@UseGuards(WhitelistDbGuard)
 export class EmailController {
   constructor(private readonly emailService: EmailService) { }
 

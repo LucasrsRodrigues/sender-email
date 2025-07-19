@@ -8,6 +8,7 @@ import { MetricsModule } from './metrics/metrics.module';
 import { WebhookModule } from './webhook/webhook.module';
 import { CacheConfigModule } from './cache/cache.module';
 import { DatabaseConfigModule } from './config/config.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { DatabaseConfigModule } from './config/config.module';
     WebhookModule,
     CacheConfigModule,
     DatabaseConfigModule,
+    AdminModule
   ],
 })
 export class AppModule { }
