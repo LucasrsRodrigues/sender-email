@@ -11,6 +11,7 @@ import { DatabaseConfigModule } from './config/config.module';
 import { AdminModule } from './admin/admin.module';
 import { MonitoringModule } from './monitoring/performance.module';
 import { BackupModule } from './backup/backup.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { BackupModule } from './backup/backup.module';
     AdminModule,
     MonitoringModule,
     BackupModule,
+    AuthModule
   ],
 })
 export class AppModule { }
