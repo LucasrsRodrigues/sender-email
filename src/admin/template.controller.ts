@@ -124,18 +124,18 @@ export class TemplateController {
   }
 
   // Importar template de arquivo
-  @Post('import')
-  async importTemplate(@Body() body: {
-    name: string;
-    filePath: string;
-    createdBy?: string;
-  }) {
-    // Implementar importação de template de arquivo .hbs/.html
-    return {
-      status: 'success',
-      message: `Template '${body.name}' importado com sucesso`,
-    };
-  }
+  // @Post('import')
+  // async importTemplate(@Body() body: {
+  //   name: string;
+  //   filePath: string;
+  //   createdBy?: string;
+  // }) {
+  //   // Implementar importação de template de arquivo .hbs/.html
+  //   return {
+  //     status: 'success',
+  //     message: `Template '${body.name}' importado com sucesso`,
+  //   };
+  // }
 
   // Exportar template
   @Get(':name/export')
@@ -156,5 +156,46 @@ export class TemplateController {
         },
       },
     };
+  }
+
+  // Importar template de arquivo
+  @Post('import')
+  async importTemplate(@Body() body: {
+    name: string;
+    subject: string;
+    content: string;
+    description?: string;
+    createdBy?: string;
+  }) {
+    const id = await this.templateService.createTemplate(body);
+
+    return {
+      status: 'success',
+      message: `Template '${body.name}' importado com sucesso`,
+      data: { id },
+    };
+  }
+
+  // Validar template
+  @Post(':name/validate')
+  async validateTemplate(
+    @Param('name') name: string,
+    @Body() variables: Record<string, any>
+  ) {
+    try {
+      const preview = await this.templateService.previewTemplate(name, variables);
+
+      return {
+        status: 'success',
+        message: 'Template válido',
+        data: { preview },
+      };
+    } catch (error) {
+      return {
+        status: 'error',
+        message: 'Template inválido',
+        error: error.message,
+      };
+    }
   }
 }
