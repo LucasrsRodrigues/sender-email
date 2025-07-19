@@ -3,6 +3,9 @@ import { ConfigService } from './config.service';
 import { WhitelistGuard } from '../common/guards/whitelist.guard';
 import { WhitelistDbGuard } from 'src/common/guards/whitelist-db-.guard';
 import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { UserRole } from '@prisma/client';
 
 class UpdateConfigDto {
   @IsNotEmpty({ message: 'O valor não pode ser vazio' })
@@ -30,7 +33,8 @@ class AddBlockedDomainDto {
 }
 
 @Controller('admin/config')
-@UseGuards(WhitelistDbGuard)
+@UseGuards(WhitelistDbGuard, JwtAuthGuard)
+@Roles(UserRole.ADMIN)
 export class ConfigController {
   constructor(private readonly configService: ConfigService) { }
 

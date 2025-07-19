@@ -23,6 +23,8 @@ export class AuthController {
   constructor(private authService: AuthService) { }
 
   // Registrar usuário
+  @UseGuards(JwtAuthGuard)
+  @Roles(UserRole.ADMIN)
   @Post('register')
   async register(@Body() createUserDto: CreateUserDto) {
     const result = await this.authService.register(createUserDto);

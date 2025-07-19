@@ -2,9 +2,10 @@ import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { MetricsService } from './metrics.service';
 import { WhitelistGuard } from '../common/guards/whitelist.guard';
 import { WhitelistDbGuard } from 'src/common/guards/whitelist-db-.guard';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller('metrics')
-@UseGuards(WhitelistDbGuard)
+@UseGuards(WhitelistDbGuard, JwtAuthGuard)
 export class MetricsController {
   constructor(private readonly metricsService: MetricsService) { }
 

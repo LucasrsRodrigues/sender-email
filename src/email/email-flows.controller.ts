@@ -1,6 +1,7 @@
 import { Controller, Post, Get, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { EmailFlowsService } from './email-flows.service';
 import { WhitelistDbGuard } from 'src/common/guards/whitelist-db-.guard';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 class StartOnboardingDto {
   userId: string;
@@ -26,7 +27,7 @@ class StartMarketingCampaignDto {
 }
 
 @Controller('email/flows')
-@UseGuards(WhitelistDbGuard)
+@UseGuards(WhitelistDbGuard, JwtAuthGuard)
 export class EmailFlowsController {
   constructor(private readonly emailFlowsService: EmailFlowsService) { }
 

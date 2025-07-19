@@ -1,9 +1,10 @@
 import { Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { PerformanceService } from './performance.service';
 import { WhitelistDbGuard } from 'src/common/guards/whitelist-db-.guard';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller('metrics/performance')
-@UseGuards(WhitelistDbGuard)
+@UseGuards(WhitelistDbGuard, JwtAuthGuard)
 export class PerformanceController {
   constructor(private readonly performanceService: PerformanceService) { }
 

@@ -1,6 +1,9 @@
 import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { WhitelistDbGuard } from 'src/common/guards/whitelist-db-.guard';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { UserRole } from '@prisma/client';
 
 class CreateWebhookDto {
   name: string;
@@ -24,7 +27,8 @@ class UpdateWebhookDto {
 }
 
 @Controller('admin/webhooks')
-@UseGuards(WhitelistDbGuard)
+@UseGuards(WhitelistDbGuard, JwtAuthGuard)
+@Roles(UserRole.ADMIN)
 export class WebhookController {
   constructor(private readonly prisma: PrismaService) { }
 

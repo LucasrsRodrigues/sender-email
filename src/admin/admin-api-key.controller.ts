@@ -30,7 +30,7 @@ interface UpdateApiKeyDto {
 
 @Controller('admin/api-keys')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(UserRole.ADMIN)
+@Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
 export class AdminApiKeysController {
   constructor(private authService: AuthService) { }
 

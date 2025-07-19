@@ -4,9 +4,10 @@ import { EmailService } from './email.service';
 import { SendEmailDto } from './dto/send-email.dto';
 import { WhitelistGuard } from '../common/guards/whitelist.guard';
 import { WhitelistDbGuard } from 'src/common/guards/whitelist-db-.guard';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller('email')
-@UseGuards(WhitelistDbGuard)
+@UseGuards(WhitelistDbGuard, JwtAuthGuard)
 export class EmailController {
   constructor(private readonly emailService: EmailService) { }
 
