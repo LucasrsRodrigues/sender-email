@@ -4,9 +4,12 @@ CREATE TYPE "EmailStatus" AS ENUM ('PENDING', 'SENT', 'FAILED', 'RETRYING');
 -- CreateEnum
 CREATE TYPE "SystemConfigType" AS ENUM ('STRING', 'NUMBER', 'BOOLEAN', 'JSON', 'ARRAY');
 
+-- CreateEnum
+CREATE TYPE "UserRole" AS ENUM ('USER', 'ADMIN', 'SUPER_ADMIN');
+
 -- CreateTable
 CREATE TABLE "email_logs" (
-    "id" TEXT NOT NULL,
+    "id" UUID NOT NULL,
     "to" TEXT NOT NULL,
     "subject" TEXT NOT NULL,
     "template" TEXT NOT NULL,
@@ -20,13 +23,14 @@ CREATE TABLE "email_logs" (
     "attempts" INTEGER NOT NULL DEFAULT 0,
     "max_attempts" INTEGER NOT NULL DEFAULT 3,
     "job_id" TEXT,
+    "user_id" UUID,
 
     CONSTRAINT "email_logs_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "system_configs" (
-    "id" TEXT NOT NULL,
+    "id" UUID NOT NULL,
     "key" TEXT NOT NULL,
     "value" TEXT NOT NULL,
     "type" "SystemConfigType" NOT NULL DEFAULT 'STRING',
@@ -44,7 +48,7 @@ CREATE TABLE "system_configs" (
 
 -- CreateTable
 CREATE TABLE "config_history" (
-    "id" TEXT NOT NULL,
+    "id" UUID NOT NULL,
     "config_key" TEXT NOT NULL,
     "old_value" TEXT,
     "new_value" TEXT NOT NULL,
@@ -57,7 +61,7 @@ CREATE TABLE "config_history" (
 
 -- CreateTable
 CREATE TABLE "allowed_ips" (
-    "id" TEXT NOT NULL,
+    "id" UUID NOT NULL,
     "ip_address" TEXT NOT NULL,
     "description" TEXT,
     "is_active" BOOLEAN NOT NULL DEFAULT true,
@@ -72,7 +76,7 @@ CREATE TABLE "allowed_ips" (
 
 -- CreateTable
 CREATE TABLE "blocked_domains" (
-    "id" TEXT NOT NULL,
+    "id" UUID NOT NULL,
     "domain" TEXT NOT NULL,
     "reason" TEXT,
     "is_active" BOOLEAN NOT NULL DEFAULT true,
@@ -85,7 +89,7 @@ CREATE TABLE "blocked_domains" (
 
 -- CreateTable
 CREATE TABLE "email_templates" (
-    "id" TEXT NOT NULL,
+    "id" UUID NOT NULL,
     "name" TEXT NOT NULL,
     "subject" TEXT NOT NULL,
     "content" TEXT NOT NULL,
@@ -103,8 +107,8 @@ CREATE TABLE "email_templates" (
 
 -- CreateTable
 CREATE TABLE "template_history" (
-    "id" TEXT NOT NULL,
-    "template_id" TEXT NOT NULL,
+    "id" UUID NOT NULL,
+    "template_id" UUID NOT NULL,
     "name" TEXT NOT NULL,
     "subject" TEXT NOT NULL,
     "content" TEXT NOT NULL,
@@ -118,7 +122,7 @@ CREATE TABLE "template_history" (
 
 -- CreateTable
 CREATE TABLE "webhook_configs" (
-    "id" TEXT NOT NULL,
+    "id" UUID NOT NULL,
     "name" TEXT NOT NULL,
     "url" TEXT NOT NULL,
     "secret" TEXT,
@@ -138,8 +142,8 @@ CREATE TABLE "webhook_configs" (
 
 -- CreateTable
 CREATE TABLE "webhook_logs" (
-    "id" TEXT NOT NULL,
-    "webhook_id" TEXT NOT NULL,
+    "id" UUID NOT NULL,
+    "webhook_id" UUID NOT NULL,
     "event" TEXT NOT NULL,
     "url" TEXT NOT NULL,
     "payload" JSONB NOT NULL,
@@ -155,20 +159,33 @@ CREATE TABLE "webhook_logs" (
 
 -- CreateTable
 CREATE TABLE "api_keys" (
-    "id" TEXT NOT NULL,
+    "id" UUID NOT NULL,
+    "user_id" UUID NOT NULL,
     "name" TEXT NOT NULL,
-    "key" TEXT NOT NULL,
-    "permissions" TEXT[],
+    "hashed_key" TEXT NOT NULL,
+    "key_preview" TEXT NOT NULL,
     "is_active" BOOLEAN NOT NULL DEFAULT true,
     "expires_at" TIMESTAMP(3),
     "last_used" TIMESTAMP(3),
     "usage_count" INTEGER NOT NULL DEFAULT 0,
-    "rate_limit" INTEGER NOT NULL DEFAULT 100,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(3),
-    "created_by" TEXT,
 
     CONSTRAINT "api_keys_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "users" (
+    "id" UUID NOT NULL,
+    "username" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "password" TEXT NOT NULL,
+    "role" "UserRole" NOT NULL DEFAULT 'USER',
+    "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+    "last_login" TIMESTAMP(3),
+
+    CONSTRAINT "users_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -187,10 +204,19 @@ CREATE UNIQUE INDEX "blocked_domains_domain_key" ON "blocked_domains"("domain");
 CREATE UNIQUE INDEX "email_templates_name_key" ON "email_templates"("name");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "api_keys_key_key" ON "api_keys"("key");
+CREATE UNIQUE INDEX "users_username_key" ON "users"("username");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
+
+-- AddForeignKey
+ALTER TABLE "email_logs" ADD CONSTRAINT "email_logs_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "template_history" ADD CONSTRAINT "template_history_template_id_fkey" FOREIGN KEY ("template_id") REFERENCES "email_templates"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "webhook_logs" ADD CONSTRAINT "webhook_logs_webhook_id_fkey" FOREIGN KEY ("webhook_id") REFERENCES "webhook_configs"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "api_keys" ADD CONSTRAINT "api_keys_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;

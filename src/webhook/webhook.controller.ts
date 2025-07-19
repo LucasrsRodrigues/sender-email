@@ -47,9 +47,24 @@ export class WebhookController {
     };
   }
 
+  // Listar todos os webhooks
+  @Get("health")
+  async getHealth() {
+    // TODO: Arrumar esse health
+
+    return {
+      status: 'success',
+      data: { ok: 'true' },
+    };
+  }
+
   // Obter webhook específico
   @Get(':id')
   async getWebhook(@Param('id') id: string) {
+    console.log("==+> getWeb")
+    console.log(id)
+    console.log("==+> getWeb")
+
     const webhook = await this.prisma.webhookConfig.findUnique({
       where: { id },
       include: {

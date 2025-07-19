@@ -2,10 +2,18 @@ import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards } fro
 import { ConfigService } from './config.service';
 import { WhitelistGuard } from '../common/guards/whitelist.guard';
 import { WhitelistDbGuard } from 'src/common/guards/whitelist-db-.guard';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 class UpdateConfigDto {
+  @IsNotEmpty({ message: 'O valor não pode ser vazio' })
   value: any;
+
+  @IsOptional()
+  @IsString({ message: 'changedBy deve ser uma string' })
   changedBy?: string;
+
+  @IsOptional()
+  @IsString({ message: 'reason deve ser uma string' })
   reason?: string;
 }
 
@@ -63,6 +71,12 @@ export class ConfigController {
   // Atualizar configuração
   @Put(':key')
   async updateConfig(@Param('key') key: string, @Body() dto: UpdateConfigDto) {
+
+    console.log("======> updateCOnfig")
+    console.log(dto)
+    console.log("======> updateCOnfig")
+
+
     await this.configService.set(key, dto.value, dto.changedBy, dto.reason);
 
     return {
