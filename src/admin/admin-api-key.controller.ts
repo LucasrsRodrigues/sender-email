@@ -15,6 +15,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole } from '@prisma/client';
+import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 
 interface CreateApiKeyDto {
   name: string;
@@ -71,6 +72,48 @@ export class AdminApiKeysController {
     };
   }
 
+  // Criar nova API Key (admin pode criar para qualquer usuário)
+  @Post()
+  async createApiKey(
+    @Body() createApiKeyDto: CreateApiKeyDto,
+    @CurrentUser() user: any
+  ) {
+    const { name, expiresAt, userId } = createApiKeyDto;
+
+    let parsedExpiresAt: Date | undefined;
+
+    if (expiresAt) {
+      const maybeDate = new Date(expiresAt);
+      if (!isNaN(maybeDate.getTime())) {
+        parsedExpiresAt = maybeDate;
+      }
+    }
+
+    const apiKey = await this.authService.generateApiKey(
+      userId ?? user.userId,
+      name,
+      parsedExpiresAt, // Será undefined se for inválido
+    );
+
+    return {
+      status: 'success',
+      message: 'API Key criada com sucesso',
+      data: { apiKey },
+    };
+  }
+
+
+  // Estatísticas das API Keys
+  @Get('stats')
+  async getApiKeyStats(@Query('period') period = 'week') {
+    const stats = await this.authService.getApiKeyStats(period);
+
+    return {
+      status: 'success',
+      data: stats,
+    };
+  }
+
   // Obter API Key específica
   @Get(':id')
   async getApiKey(@Param('id') id: string) {
@@ -82,26 +125,6 @@ export class AdminApiKeysController {
     };
   }
 
-  // Criar nova API Key (admin pode criar para qualquer usuário)
-  @Post()
-  async createApiKey(@Body() createApiKeyDto: CreateApiKeyDto) {
-    const { name, expiresAt, userId } = createApiKeyDto;
-
-    const parsedExpiresAt = new Date(expiresAt);
-
-
-    const apiKey = await this.authService.generateApiKey(
-      userId, // Se não fornecido, pode usar o usuário atual
-      name,
-      parsedExpiresAt,
-    );
-
-    return {
-      status: 'success',
-      message: 'API Key criada com sucesso',
-      data: { apiKey },
-    };
-  }
 
   // Atualizar API Key
   @Put(':id')
@@ -141,16 +164,7 @@ export class AdminApiKeysController {
     };
   }
 
-  // Estatísticas das API Keys
-  @Get('stats')
-  async getApiKeyStats(@Query('period') period = 'week') {
-    const stats = await this.authService.getApiKeyStats(period);
 
-    return {
-      status: 'success',
-      data: stats,
-    };
-  }
 
   // Uso de uma API Key específica
   @Get(':id/usage')
