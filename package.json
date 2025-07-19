@@ -37,7 +37,7 @@
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/schedule": "^6.0.0",
     "@nestjs/throttler": "^6.4.0",
-    "@prisma/client": "^6.12.0",
+    "prisma/generated/prisma": "^6.12.0",
     "@sendgrid/mail": "^8.1.5",
     "@types/nodemailer": "^6.4.17",
     "bcrypt": "^6.0.0",

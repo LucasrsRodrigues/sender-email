@@ -5,7 +5,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { TemplateService } from './template.service';
 import { SendEmailDto, EmailJobData, EmailPriority } from './dto/send-email.dto';
 import { TemplateDbService } from './template-db.service';
-import { EmailStatus } from '@prisma/client';
+import { EmailStatus } from 'prisma/generated/prisma';
 
 @Injectable()
 export class EmailService {

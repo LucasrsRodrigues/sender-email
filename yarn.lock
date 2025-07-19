@@ -1231,9 +1231,9 @@
   resolved "https://registry.npmjs.org/@pkgr/core/-/core-0.3.4.tgz"
   integrity sha512-MrfbnMgfKexic6mxC4xrSBVQHSvmvhz7qtSDG5cHg4xn8kHXkPltUY44R5u4ghYf+1rXpOvC2drbMcE1rZ3a2A==
 
-"@prisma/client@^6.12.0":
+"prisma/generated/prisma@^6.12.0":
   version "6.12.0"
-  resolved "https://registry.npmjs.org/@prisma/client/-/client-6.12.0.tgz"
+  resolved "https://registry.npmjs.org/prisma/generated/prisma/-/client-6.12.0.tgz"
   integrity sha512-wn98bJ3Cj6edlF4jjpgXwbnQIo/fQLqqQHPk2POrZPxTlhY3+n90SSIF3LMRVa8VzRFC/Gec3YKJRxRu+AIGVA==
 
 "@prisma/config@6.12.0":

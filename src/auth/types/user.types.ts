@@ -1,4 +1,4 @@
-import { UserRole } from '@prisma/client';
+import { UserRole } from 'prisma/generated/prisma';
 
 /**
  * Interface do usuário autenticado (dados do JWT payload)

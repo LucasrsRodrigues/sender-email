@@ -16,7 +16,7 @@ import { LocalAuthGuard } from './guards/local-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { Roles } from './decorators/roles.decorator';
 import { CreateUserDto, LoginDto, UpdateUserDto, GenerateApiKeyDto } from './dto/auth.dto';
-import { UserRole } from '@prisma/client';
+import { UserRole } from 'prisma/generated/prisma';
 
 @Controller('auth')
 export class AuthController {

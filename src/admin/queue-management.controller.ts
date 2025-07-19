@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Delete, Body, Query, UseGuards } from '@nestjs/common';
 import { BullMQHealthService } from '../health/bullmq-health.service';
 import { WhitelistDbGuard } from 'src/common/guards/whitelist-db-.guard';
-import { UserRole } from '@prisma/client';
+import { UserRole } from 'prisma/generated/prisma';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 
 @Controller('admin/queue')

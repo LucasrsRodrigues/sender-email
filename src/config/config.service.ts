@@ -1,6 +1,6 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { SystemConfigType } from '@prisma/client';
+import { SystemConfigType } from 'prisma/generated/prisma';
 
 export interface ConfigItem {
   key: string;

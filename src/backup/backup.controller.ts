@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Query, UseGuards } from '@nestjs/common';
 import { BackupService } from './backup.service';
 import { WhitelistDbGuard } from 'src/common/guards/whitelist-db-.guard';
 import { Roles } from 'src/auth/decorators/roles.decorator';
-import { UserRole } from '@prisma/client';
+import { UserRole } from 'prisma/generated/prisma';
 
 @Controller('admin/backup')
 @UseGuards(WhitelistDbGuard)
