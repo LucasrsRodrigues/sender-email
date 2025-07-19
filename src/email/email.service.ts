@@ -127,7 +127,132 @@ export class EmailService {
     return delays[priority] || delays[EmailPriority.NORMAL];
   }
 
+  async functeste(limit, sortBy, sortOrder, template, search, startDate, endDate, status, level) {
+    const limitNum = limit ? parseInt(limit) : 50;
+    const sortField = sortBy || 'createdAt';
+    const sortDirection = sortOrder === 'asc' ? 'asc' : 'desc';
+
+    // Construir filtros WHERE
+    const where: any = {};
+
+    // Filtro por status
+    if (status && status !== 'all') {
+      where.status = status.toUpperCase();
+    }
+
+    // Filtro por template
+    if (template) {
+      where.template = { contains: template, mode: 'insensitive' };
+    }
+
+    // Filtro por busca geral
+    if (search) {
+      where.OR = [
+        { to: { contains: search, mode: 'insensitive' } },
+        { subject: { contains: search, mode: 'insensitive' } },
+        { errorMessage: { contains: search, mode: 'insensitive' } }
+      ];
+    }
+
+    // Filtro por data
+    if (startDate) {
+      where.createdAt = {
+        ...where.createdAt,
+        gte: new Date(startDate)
+      };
+    }
+    if (endDate) {
+      where.createdAt = {
+        ...where.createdAt,
+        lte: new Date(endDate)
+      };
+    }
+
+    // Buscar logs
+    const [logs, totalCount] = await Promise.all([
+      this.prisma.emailLog.findMany({
+        where,
+        orderBy: { [sortField]: sortDirection },
+        take: limitNum,
+        select: {
+          id: true,
+          to: true,
+          subject: true,
+          template: true,
+          status: true,
+          provider: true,
+          errorMessage: true,
+          createdAt: true,
+          sentAt: true,
+          attempts: true,
+          variables: true,
+          // processingTime: true
+        }
+      }),
+      this.prisma.emailLog.count({ where })
+    ]);
+
+    // Mapear para formato de logs
+    const formattedLogs = logs.map(log => ({
+      id: log.id,
+      level: this.mapStatusToLevel(log.status),
+      message: this.formatLogMessage(log),
+      template: log.template,
+      to: log.to,
+      status: log.status,
+      provider: log.provider,
+      createdAt: log.createdAt,
+      sentAt: log.sentAt,
+      errorMessage: log.errorMessage,
+      attempts: log.attempts,
+      variables: log.variables,
+      // processingTime: log.processingTime,
+      timestamp: log.createdAt // Para compatibilidade
+    }));
+
+    return {
+      logs: formattedLogs,
+      count: totalCount,
+      filters: {
+        level,
+        status,
+        template,
+        search,
+        startDate,
+        endDate,
+        limit: limitNum,
+        sortBy: sortField,
+        sortOrder: sortDirection
+      }
+    }
+  }
+
   getAvailableTemplates(): string[] {
     return this.templateService.getAvailableTemplates();
+  }
+
+  private mapStatusToLevel(status: string): string {
+    switch (status) {
+      case 'SENT': return 'INFO';
+      case 'FAILED': return 'ERROR';
+      case 'PENDING': return 'INFO';
+      case 'RETRYING': return 'WARN';
+      default: return 'INFO';
+    }
+  }
+
+  private formatLogMessage(log: any): string {
+    switch (log.status) {
+      case 'SENT':
+        return `Email enviado para ${log.to} via ${log.provider || 'desconhecido'}`;
+      case 'FAILED':
+        return `Falha no envio para ${log.to}: ${log.errorMessage || 'Erro desconhecido'}`;
+      case 'PENDING':
+        return `Email para ${log.to} aguardando processamento`;
+      case 'RETRYING':
+        return `Tentativa ${log.attempts} de envio para ${log.to}`;
+      default:
+        return `Email para ${log.to} - Status: ${log.status}`;
+    }
   }
 }

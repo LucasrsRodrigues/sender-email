@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Get, Param } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Get, Param, Query } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { EmailService } from './email.service';
 import { SendEmailDto } from './dto/send-email.dto';
@@ -68,6 +68,29 @@ export class EmailController {
       queue: queueStatus,
     };
   }
+
+  @Get('logs')
+  async getEmailLogs(
+    @Query('level') level?: string,
+    @Query('status') status?: string,
+    @Query('template') template?: string,
+    @Query('limit') limit?: string,
+    @Query('sortBy') sortBy?: string,
+    @Query('sortOrder') sortOrder?: string,
+    @Query('search') search?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string
+  ) {
+    const testeData = await this.emailService.functeste(limit, sortBy, sortOrder, template, search, startDate, endDate, status, level)
+
+
+    return {
+      status: 'success',
+      data: testeData
+    }
+  }
+
+
 
   private getEstimatedDelay(priority: string): string {
     const delays = {
