@@ -8,92 +8,92 @@ datasource db {
 }
 
 model EmailLog {
-  id           String      @id @default(cuid())
-  to           String
-  subject      String
-  template     String
-  variables    Json?
-  status       EmailStatus @default(PENDING)
-  provider     String?
-  errorMessage String?
-  sentAt       DateTime?
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
-  attempts     Int         @default(0)
-  maxAttempts  Int         @default(3)
-  jobId        String?     @unique
+  id           String      @id @default(cuid()) @map("id")
+  to           String      @map("to")
+  subject      String      @map("subject")
+  template     String      @map("template")
+  variables    Json?       @map("variables")
+  status       EmailStatus @default(PENDING) @map("status")
+  provider     String?     @map("provider")
+  errorMessage String?     @map("error_message")
+  sentAt       DateTime?   @map("sent_at")
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime    @updatedAt @map("updated_at")
+  attempts     Int         @default(0) @map("attempts")
+  maxAttempts  Int         @default(3) @map("max_attempts")
+  jobId        String?     @unique @map("job_id")
 
   @@map("email_logs")
 }
 
 model SystemConfig {
-  id          String           @id @default(cuid())
-  key         String           @unique
-  value       String
-  type        SystemConfigType @default(STRING)
-  description String?
-  category    String
-  isActive    Boolean          @default(true)
-  isPublic    Boolean          @default(false) // Se pode ser exposto em APIs públicas
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
-  createdBy   String? // ID do usuário que criou
-  updatedBy   String? // ID do usuário que atualizou
+  id          String           @id @default(cuid()) @map("id")
+  key         String           @unique @map("key")
+  value       String           @map("value")
+  type        SystemConfigType @default(STRING) @map("type")
+  description String?          @map("description")
+  category    String           @map("category")
+  isActive    Boolean          @default(true) @map("is_active")
+  isPublic    Boolean          @default(false) @map("is_public")
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @updatedAt @map("updated_at")
+  createdBy   String?          @map("created_by")
+  updatedBy   String?          @map("updated_by")
 
   @@map("system_configs")
 }
 
 model ConfigHistory {
-  id        String   @id @default(cuid())
-  configKey String
-  oldValue  String?
-  newValue  String
-  changedBy String? // ID do usuário
-  reason    String? // Motivo da mudança
-  createdAt DateTime @default(now())
+  id        String   @id @default(cuid()) @map("id")
+  configKey String   @map("config_key")
+  oldValue  String?  @map("old_value")
+  newValue  String   @map("new_value")
+  changedBy String?  @map("changed_by")
+  reason    String?  @map("reason")
+  createdAt DateTime @default(now()) @map("created_at")
 
   @@map("config_history")
 }
 
 model AllowedIP {
-  id          String    @id @default(cuid())
-  ipAddress   String    @unique
-  description String?
-  isActive    Boolean   @default(true)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  lastUsed    DateTime?
-  usageCount  Int       @default(0)
-  createdBy   String?
+  id          String    @id @default(cuid()) @map("id")
+  ipAddress   String    @unique @map("ip_address")
+  description String?   @map("description")
+  isActive    Boolean   @default(true) @map("is_active")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  lastUsed    DateTime? @map("last_used")
+  usageCount  Int       @default(0) @map("usage_count")
+  createdBy   String?   @map("created_by")
 
   @@map("allowed_ips")
 }
 
 model BlockedDomain {
-  id        String   @id @default(cuid())
-  domain    String   @unique
-  reason    String?
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  blockedBy String?
+  id        String   @id @default(cuid()) @map("id")
+  domain    String   @unique @map("domain")
+  reason    String?  @map("reason")
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  blockedBy String?  @map("blocked_by")
 
   @@map("blocked_domains")
 }
 
 model EmailTemplate {
-  id          String   @id @default(cuid())
-  name        String   @unique
-  subject     String
-  content     String // Conteúdo HTML/Handlebars
-  description String?
-  variables   Json? // Schema das variáveis esperadas
-  isActive    Boolean  @default(true)
-  version     Int      @default(1)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  createdBy   String?
-  updatedBy   String?
+  id          String   @id @default(cuid()) @map("id")
+  name        String   @unique @map("name")
+  subject     String   @map("subject")
+  content     String   @map("content")
+  description String?  @map("description")
+  variables   Json?    @map("variables")
+  isActive    Boolean  @default(true) @map("is_active")
+  version     Int      @default(1) @map("version")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  createdBy   String?  @map("created_by")
+  updatedBy   String?  @map("updated_by")
 
   history TemplateHistory[]
 
@@ -101,15 +101,15 @@ model EmailTemplate {
 }
 
 model TemplateHistory {
-  id         String   @id @default(cuid())
-  templateId String
-  name       String
-  subject    String
-  content    String
-  version    Int
-  changedBy  String?
-  reason     String?
-  createdAt  DateTime @default(now())
+  id         String   @id @default(cuid()) @map("id")
+  templateId String   @map("template_id")
+  name       String   @map("name")
+  subject    String   @map("subject")
+  content    String   @map("content")
+  version    Int      @map("version")
+  changedBy  String?  @map("changed_by")
+  reason     String?  @map("reason")
+  createdAt  DateTime @default(now()) @map("created_at")
 
   template EmailTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
 
@@ -117,20 +117,20 @@ model TemplateHistory {
 }
 
 model WebhookConfig {
-  id           String    @id @default(cuid())
-  name         String
-  url          String
-  secret       String?
-  events       String[] // ['email.sent', 'email.failed', etc]
-  isActive     Boolean   @default(true)
-  retryCount   Int       @default(3)
-  timeout      Int       @default(5000) // em milliseconds
-  headers      Json? // Headers customizados
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  lastUsed     DateTime?
-  successCount Int       @default(0)
-  failureCount Int       @default(0)
+  id           String    @id @default(cuid()) @map("id")
+  name         String    @map("name")
+  url          String    @map("url")
+  secret       String?   @map("secret")
+  events       String[]  @map("events")
+  isActive     Boolean   @default(true) @map("is_active")
+  retryCount   Int       @default(3) @map("retry_count")
+  timeout      Int       @default(5000) @map("timeout")
+  headers      Json?     @map("headers")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  lastUsed     DateTime? @map("last_used")
+  successCount Int       @default(0) @map("success_count")
+  failureCount Int       @default(0) @map("failure_count")
 
   logs WebhookLog[]
 
@@ -138,17 +138,17 @@ model WebhookConfig {
 }
 
 model WebhookLog {
-  id           String   @id @default(cuid())
-  webhookId    String
-  event        String
-  url          String
-  payload      Json
-  response     String?
-  statusCode   Int?
-  success      Boolean
-  errorMessage String?
-  responseTime Int? // em milliseconds
-  createdAt    DateTime @default(now())
+  id           String   @id @default(cuid()) @map("id")
+  webhookId    String   @map("webhook_id")
+  event        String   @map("event")
+  url          String   @map("url")
+  payload      Json     @map("payload")
+  response     String?  @map("response")
+  statusCode   Int?     @map("status_code")
+  success      Boolean  @map("success")
+  errorMessage String?  @map("error_message")
+  responseTime Int?     @map("response_time")
+  createdAt    DateTime @default(now()) @map("created_at")
 
   webhook WebhookConfig @relation(fields: [webhookId], references: [id], onDelete: Cascade)
 
@@ -156,18 +156,18 @@ model WebhookLog {
 }
 
 model ApiKey {
-  id          String    @id @default(cuid())
-  name        String
-  key         String    @unique
-  permissions String[] // ['send_email', 'view_metrics', 'admin']
-  isActive    Boolean   @default(true)
-  expiresAt   DateTime?
-  lastUsed    DateTime?
-  usageCount  Int       @default(0)
-  rateLimit   Int       @default(100) // requests per hour
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  createdBy   String?
+  id          String    @id @default(cuid()) @map("id")
+  name        String    @map("name")
+  key         String    @unique @map("key")
+  permissions String[]  @map("permissions")
+  isActive    Boolean   @default(true) @map("is_active")
+  expiresAt   DateTime? @map("expires_at")
+  lastUsed    DateTime? @map("last_used")
+  usageCount  Int       @default(0) @map("usage_count")
+  rateLimit   Int       @default(100) @map("rate_limit")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  createdBy   String?   @map("created_by")
 
   @@map("api_keys")
 }

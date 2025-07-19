@@ -3,6 +3,7 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Queue, FlowProducer } from 'bullmq';
 import { PrismaService } from '../prisma/prisma.service';
 import { EmailJobData, EmailPriority } from './dto/send-email.dto';
+import Redis from 'ioredis';
 
 export interface EmailFlow {
   name: string;
@@ -24,19 +25,26 @@ export interface FlowStep {
 export class EmailFlowsService {
   private readonly logger = new Logger(EmailFlowsService.name);
   private flowProducer: FlowProducer;
+  private redisClient: Redis;
 
   constructor(
     @InjectQueue('email') private emailQueue: Queue,
     private prisma: PrismaService,
   ) {
+    // Configuração Redis compartilhada
+    const redisConfig = {
+      host: process.env.REDIS_HOST || 'localhost',
+      port: parseInt(process.env.REDIS_PORT) || 6379,
+      password: process.env.REDIS_PASSWORD,
+    };
+
     // Inicializar FlowProducer
     this.flowProducer = new FlowProducer({
-      connection: {
-        host: process.env.REDIS_HOST || 'localhost',
-        port: parseInt(process.env.REDIS_PORT) || 6379,
-        password: process.env.REDIS_PASSWORD,
-      },
+      connection: redisConfig,
     });
+
+    // Inicializar cliente Redis separado para operações diretas
+    this.redisClient = new Redis(redisConfig);
   }
 
   // Iniciar flow de onboarding para novo usuário
@@ -146,6 +154,17 @@ export class EmailFlowsService {
     } catch (error) {
       this.logger.error(`Erro ao iniciar flow de onboarding: ${error.message}`);
       throw error;
+    }
+  }
+
+  // Método para limpar recursos
+  async onModuleDestroy() {
+    try {
+      await this.flowProducer.close();
+      await this.redisClient.quit();
+      this.logger.log('FlowProducer e Redis client fechados');
+    } catch (error) {
+      this.logger.error(`Erro ao fechar conexões: ${error.message}`);
     }
   }
 
@@ -310,9 +329,8 @@ export class EmailFlowsService {
   // Cancelar flow específico
   async cancelFlow(flowId: string): Promise<void> {
     try {
-      // Usar connection do flowProducer ao invés de client
-      const redis = await this.flowProducer.connection;
-      await redis.del(`bull:email:${flowId}`);
+      // Usar cliente Redis direto
+      await this.redisClient.del(`bull:email:${flowId}`);
 
       this.logger.log(`Flow ${flowId} cancelado`);
     } catch (error) {
@@ -324,9 +342,8 @@ export class EmailFlowsService {
   // Obter status de um flow
   async getFlowStatus(flowId: string) {
     try {
-      // Usar connection do flowProducer
-      const redis = await this.flowProducer.connection;
-      const flowData = await redis.hgetall(`bull:email:${flowId}`);
+      // Usar cliente Redis direto
+      const flowData = await this.redisClient.hgetall(`bull:email:${flowId}`);
 
       return {
         flowId,
@@ -345,13 +362,12 @@ export class EmailFlowsService {
   // Listar flows ativos
   async getActiveFlows(limit: number = 50) {
     try {
-      // Usar connection do flowProducer
-      const redis = await this.flowProducer.connection;
-      const keys = await redis.keys('bull:email:*-flow');
+      // Usar cliente Redis direto
+      const keys = await this.redisClient.keys('bull:email:*-flow');
       const flows = [];
 
       for (const key of keys.slice(0, limit)) {
-        const flowData = await redis.hgetall(key);
+        const flowData = await this.redisClient.hgetall(key);
         if (flowData.status !== 'completed' && flowData.status !== 'failed') {
           flows.push({
             id: key.replace('bull:email:', ''),

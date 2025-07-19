@@ -12,7 +12,6 @@ export class RedisConfigService {
       port: this.configService.get<number>('REDIS_PORT', 6379),
       password: this.configService.get<string>('REDIS_PASSWORD'),
       maxRetriesPerRequest: 3,
-      retryDelayOnFailover: 100,
       enableReadyCheck: false,
       lazyConnect: true,
     });
