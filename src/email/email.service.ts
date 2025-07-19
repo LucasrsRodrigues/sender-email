@@ -4,8 +4,8 @@ import { Queue } from 'bullmq';
 import { PrismaService } from '../prisma/prisma.service';
 import { TemplateService } from './template.service';
 import { SendEmailDto, EmailJobData, EmailPriority } from './dto/send-email.dto';
-import { EmailStatus } from 'generated/prisma';
 import { TemplateDbService } from './template-db.service';
+import { EmailStatus } from '@prisma/client';
 
 @Injectable()
 export class EmailService {
