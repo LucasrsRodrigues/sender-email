@@ -4,7 +4,7 @@ import { WhitelistDbGuard } from 'src/common/guards/whitelist-db-.guard';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { Roles } from 'src/auth/decorators/roles.decorator';
-import { UserRole } from 'prisma/generated/prisma';
+import { UserRole } from '../../prisma/generated/prisma';
 
 @Controller('admin/templates')
 @UseGuards(WhitelistDbGuard, JwtAuthGuard)

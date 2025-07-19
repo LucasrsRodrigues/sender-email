@@ -14,7 +14,7 @@ import { AuthService } from '../auth/auth.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
-import { UserRole } from 'prisma/generated/prisma';
+import { UserRole } from '../../prisma/generated/prisma';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 
 interface CreateApiKeyDto {

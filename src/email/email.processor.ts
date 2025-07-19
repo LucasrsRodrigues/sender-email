@@ -6,7 +6,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { TemplateDbService } from './template-db.service';
 import { ConfigService } from '../config/config.service'; // ← NOVA IMPORTAÇÃO
 import { EmailJobData } from './dto/send-email.dto';
-import { EmailStatus } from 'prisma/generated/prisma';
+import { EmailStatus } from '../../prisma/generated/prisma';
 import * as nodemailer from 'nodemailer';
 import * as sgMail from '@sendgrid/mail';
 

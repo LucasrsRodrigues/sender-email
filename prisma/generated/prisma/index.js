@@ -81,7 +81,7 @@ Prisma.NullTypes = {
 
 
 
-  const path = require('path')
+const path = require('path')
 
 /**
  * Enums
@@ -328,7 +328,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "/Users/lucasrodriguessantos/Desktop/WWW/rs.dev/Onnix/sender-email/sender-email-back/prisma/generated/prisma",
+      "value": "/Users/lucasrodriguessantos/Desktop/WWW/rs.dev/Onnix/sender-email/sender-email-back/../../prisma/generated/prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -375,10 +375,10 @@ const fs = require('fs')
 config.dirname = __dirname
 if (!fs.existsSync(path.join(__dirname, 'schema.prisma'))) {
   const alternativePaths = [
-    "prisma/generated/prisma",
+    "../../prisma/generated/prisma",
     "generated/prisma",
   ]
-  
+
   const alternativePath = alternativePaths.find((altPath) => {
     return fs.existsSync(path.join(process.cwd(), altPath, 'schema.prisma'))
   }) ?? alternativePaths[0]
@@ -396,8 +396,8 @@ config.compilerWasm = undefined
 const { warnEnvConflicts } = require('./runtime/library.js')
 
 warnEnvConflicts({
-    rootEnvPath: config.relativeEnvPaths.rootEnvPath && path.resolve(config.dirname, config.relativeEnvPaths.rootEnvPath),
-    schemaEnvPath: config.relativeEnvPaths.schemaEnvPath && path.resolve(config.dirname, config.relativeEnvPaths.schemaEnvPath)
+  rootEnvPath: config.relativeEnvPaths.rootEnvPath && path.resolve(config.dirname, config.relativeEnvPaths.rootEnvPath),
+  schemaEnvPath: config.relativeEnvPaths.schemaEnvPath && path.resolve(config.dirname, config.relativeEnvPaths.schemaEnvPath)
 })
 
 const PrismaClient = getPrismaClient(config)
@@ -406,7 +406,7 @@ Object.assign(exports, Prisma)
 
 // file annotations for bundling tools to include these files
 path.join(__dirname, "libquery_engine-darwin-arm64.dylib.node");
-path.join(process.cwd(), "prisma/generated/prisma/libquery_engine-darwin-arm64.dylib.node")
+path.join(process.cwd(), "../../prisma/generated/prisma/libquery_engine-darwin-arm64.dylib.node")
 // file annotations for bundling tools to include these files
 path.join(__dirname, "schema.prisma");
-path.join(process.cwd(), "prisma/generated/prisma/schema.prisma")
+path.join(process.cwd(), "../../prisma/generated/prisma/schema.prisma")

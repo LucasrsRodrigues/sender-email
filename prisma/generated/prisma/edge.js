@@ -327,7 +327,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "/Users/lucasrodriguessantos/Desktop/WWW/rs.dev/Onnix/sender-email/sender-email-back/prisma/generated/prisma",
+      "value": "/Users/lucasrodriguessantos/Desktop/WWW/rs.dev/Onnix/sender-email/sender-email-back/../../prisma/generated/prisma",
       "fromEnvVar": null
     },
     "config": {
