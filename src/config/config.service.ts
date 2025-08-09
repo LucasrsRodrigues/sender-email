@@ -194,6 +194,8 @@ export class ConfigService implements OnModuleInit {
       where: { isActive: true }
     });
 
+    this.logger.debug("🎲 loadConfigsToCache ", configs)
+
     for (const config of configs) {
       const value = this.parseConfigValue(config.value, config.type);
       this.configCache.set(config.key, value);

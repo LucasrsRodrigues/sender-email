@@ -58,27 +58,29 @@ export class PerformanceService {
   }
 
   // Coletar métricas a cada minuto
-  @Cron(CronExpression.EVERY_MINUTE)
-  async collectMetrics() {
-    try {
-      const metrics = await this.generateMetrics('1min');
-      this.metricsHistory.push(metrics);
+  // @Cron(CronExpression.EVERY_MINUTE)
+  // async collectMetrics() {
+  //   try {
+  //     const metrics = await this.generateMetrics('1min');
 
-      // Manter apenas as últimas 24h
-      if (this.metricsHistory.length > this.maxHistorySize) {
-        this.metricsHistory = this.metricsHistory.slice(-this.maxHistorySize);
-      }
+  //     this.metricsHistory.push(metrics);
 
-      // Log alertas críticos
-      const criticalAlerts = metrics.alerts.filter(alert => alert.level === 'error');
-      if (criticalAlerts.length > 0) {
-        this.logger.error(`Alertas críticos detectados: ${criticalAlerts.map(a => a.message).join(', ')}`);
-      }
+  //     // Manter apenas as últimas 24h
+  //     if (this.metricsHistory.length > this.maxHistorySize) {
+  //       this.metricsHistory = this.metricsHistory.slice(-this.maxHistorySize);
+  //     }
 
-    } catch (error) {
-      this.logger.error(`Erro ao coletar métricas: ${error.message}`);
-    }
-  }
+  //     // Log alertas críticos
+  //     const criticalAlerts = metrics.alerts.filter(alert => alert.level === 'error');
+
+  //     if (criticalAlerts.length > 0) {
+  //       this.logger.error(`Alertas críticos detectados: ${criticalAlerts.map(a => a.message).join(', ')}`);
+  //     }
+
+  //   } catch (error) {
+  //     this.logger.error(`Erro ao coletar métricas: ${error.message}`);
+  //   }
+  // }
 
   // Gerar métricas para período específico
   async generateMetrics(period: string): Promise<PerformanceMetrics> {

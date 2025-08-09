@@ -19,7 +19,7 @@ export class EmailProcessor extends WorkerHost {
   constructor(
     private prisma: PrismaService,
     private templateDbService: TemplateDbService,
-    private configService: ConfigService, // ← NOVA DEPENDÊNCIA
+    private configService: ConfigService,
   ) {
     super();
     // Não chamar setupEmailProviders no constructor
@@ -40,6 +40,12 @@ export class EmailProcessor extends WorkerHost {
 
       // Renderizar template usando TemplateDbService
       const { subject: templateSubject, content: htmlContent } = await this.templateDbService.renderTemplate(template, variables || {});
+
+
+      this.logger.debug("======> ", {
+        htmlContent,
+        templateSubject
+      })
 
       // Usar subject do template se não foi fornecido um específico
       const finalSubject = subject || templateSubject;
@@ -98,7 +104,6 @@ export class EmailProcessor extends WorkerHost {
     }
   }
 
-  // ← ALTERAÇÃO: Buscar configurações do banco de dados
   private async setupEmailProviders() {
     try {
       this.logger.log('🔍 Buscando configurações SMTP do banco de dados...');
