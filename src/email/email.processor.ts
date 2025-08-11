@@ -40,13 +40,6 @@ export class EmailProcessor extends WorkerHost {
 
       // Renderizar template usando TemplateDbService
       const { subject: templateSubject, content: htmlContent } = await this.templateDbService.renderTemplate(template, variables || {});
-
-
-      this.logger.debug("======> ", {
-        htmlContent,
-        templateSubject
-      })
-
       // Usar subject do template se não foi fornecido um específico
       const finalSubject = subject || templateSubject;
 

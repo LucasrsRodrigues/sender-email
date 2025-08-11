@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import * as Handlebars from 'handlebars';
+import { ConfigService } from '@nestjs/config';
 
 export interface CreateTemplateDto {
   name: string;
@@ -25,7 +26,10 @@ export class TemplateDbService {
   private readonly logger = new Logger(TemplateDbService.name);
   private compiledTemplates = new Map<string, HandlebarsTemplateDelegate>();
 
-  constructor(private prisma: PrismaService) {
+  constructor(
+    private prisma: PrismaService,
+    private configService: ConfigService
+  ) {
     this.registerHelpers();
   }
 
@@ -275,7 +279,9 @@ export class TemplateDbService {
   private registerHelpers() {
     // Helper para formatação de data
     Handlebars.registerHelper('formatDate', (date: Date, format: string) => {
-      if (!date) return '';
+      if (!date) {
+        return '';
+      }
 
       const options: Intl.DateTimeFormatOptions = {};
 
@@ -321,6 +327,82 @@ export class TemplateDbService {
     Handlebars.registerHelper('lowercase', (str: string) => {
       return str ? str.toLowerCase() : '';
     });
+
+    Handlebars.registerHelper('appUrl', (path?: string) => {
+      // Buscar URL base da aplicação das configurações ou variável de ambiente
+      const baseUrl = process.env.APP_URL || process.env.BASE_URL || 'http://localhost:3000';
+
+      // Remove trailing slash da base URL
+      const cleanBaseUrl = baseUrl.replace(/\/$/, '');
+
+      // Se não há path, retorna apenas a base URL
+      if (!path) {
+        return cleanBaseUrl;
+      }
+
+      // Remove leading slash do path se existir
+      const cleanPath = path.replace(/^\//, '');
+
+      // Retorna URL completa
+      return `${cleanBaseUrl}/${cleanPath}`;
+    });
+
+    // Helper adicional para URLs dinâmicas com parâmetros
+    Handlebars.registerHelper('buildUrl', (path: string, params?: Record<string, any>) => {
+      const baseUrl = process.env.APP_URL || process.env.BASE_URL || 'http://localhost:3000';
+      const cleanBaseUrl = baseUrl.replace(/\/$/, '');
+      const cleanPath = path.replace(/^\//, '');
+
+      let url = `${cleanBaseUrl}/${cleanPath}`;
+
+      // Adicionar parâmetros de query se fornecidos
+      if (params && Object.keys(params).length > 0) {
+        const queryString = new URLSearchParams(params).toString();
+        url += `?${queryString}`;
+      }
+
+      return url;
+    });
+
+    Handlebars.registerHelper('appUrl', (path?: string) => {
+      // Tenta buscar da configuração do banco, com fallback para ENV
+      const getBaseUrl = async () => {
+        try {
+          const configuredUrl = await this.configService.get<string>('APP_URL');
+          return configuredUrl || process.env.APP_URL || process.env.BASE_URL || 'http://localhost:3000';
+        } catch {
+          return process.env.APP_URL || process.env.BASE_URL || 'http://localhost:3000';
+        }
+      };
+
+      // Para uso síncrono, use ENV como fallback
+      const baseUrl = process.env.APP_URL || process.env.BASE_URL || 'http://localhost:3000';
+      const cleanBaseUrl = baseUrl.replace(/\/$/, '');
+
+      if (!path) {
+        return cleanBaseUrl;
+      }
+
+      const cleanPath = path.replace(/^\//, '');
+      return `${cleanBaseUrl}/${cleanPath}`;
+    });
+
+    // Helper para URLs complexas
+    Handlebars.registerHelper('resetUrl', (token: string) => {
+      const baseUrl = process.env.APP_URL || 'http://localhost:3000';
+      return `${baseUrl.replace(/\/$/, '')}/reset-password?token=${token}`;
+    });
+
+    Handlebars.registerHelper('activationUrl', (userId: string, token: string) => {
+      const baseUrl = process.env.APP_URL || 'http://localhost:3000';
+      return `${baseUrl.replace(/\/$/, '')}/activate?userId=${userId}&token=${token}`;
+    });
+
+    Handlebars.registerHelper('unsubscribeUrl', (email: string) => {
+      const baseUrl = process.env.APP_URL || 'http://localhost:3000';
+      return `${baseUrl.replace(/\/$/, '')}/unsubscribe?email=${encodeURIComponent(email)}`;
+    });
+
   }
 
   // Limpar cache

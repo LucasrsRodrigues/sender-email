@@ -109,6 +109,42 @@ export class TemplateService {
     Handlebars.registerHelper('lowercase', (str: string) => {
       return str ? str.toLowerCase() : '';
     });
+
+    Handlebars.registerHelper('appUrl', (path?: string) => {
+      // Buscar URL base da aplicação das configurações ou variável de ambiente
+      const baseUrl = process.env.APP_URL || process.env.BASE_URL || 'http://localhost:3000';
+
+      // Remove trailing slash da base URL
+      const cleanBaseUrl = baseUrl.replace(/\/$/, '');
+
+      // Se não há path, retorna apenas a base URL
+      if (!path) {
+        return cleanBaseUrl;
+      }
+
+      // Remove leading slash do path se existir
+      const cleanPath = path.replace(/^\//, '');
+
+      // Retorna URL completa
+      return `${cleanBaseUrl}/${cleanPath}`;
+    });
+
+    // Helper adicional para URLs dinâmicas com parâmetros
+    Handlebars.registerHelper('buildUrl', (path: string, params?: Record<string, any>) => {
+      const baseUrl = process.env.APP_URL || process.env.BASE_URL || 'http://localhost:3000';
+      const cleanBaseUrl = baseUrl.replace(/\/$/, '');
+      const cleanPath = path.replace(/^\//, '');
+
+      let url = `${cleanBaseUrl}/${cleanPath}`;
+
+      // Adicionar parâmetros de query se fornecidos
+      if (params && Object.keys(params).length > 0) {
+        const queryString = new URLSearchParams(params).toString();
+        url += `?${queryString}`;
+      }
+
+      return url;
+    });
   }
 
   // Método para limpar cache (útil em desenvolvimento)
